@@ -1,0 +1,34 @@
+﻿@using WebMatrix.Data;
+
+@{
+    // Fetch the hospital ID from the query string
+    var id = Request.QueryString["id"];
+
+    if (string.IsNullOrEmpty(id))
+    {
+        Response.StatusCode = 400; // Bad Request
+        Response.Write("Hospital ID is missing.");
+        Response.End();
+    }
+
+    // Open the database connection
+    var db = Database.Open("Hospitals");
+
+    // Delete the hospital from the database
+    var rowsAffected = db.Execute("DELETE FROM Hospitals WHERE Id = @0", id);
+
+    if (rowsAffected > 0)
+    {
+        // Send a successful response back
+        Response.StatusCode = 200;
+        Response.Write("Hospital deleted successfully.");
+    }
+    else
+    {
+        // If no rows were deleted, hospital may not exist
+        Response.StatusCode = 404; // Not Found
+        Response.Write("Hospital not found.");
+    }
+
+    Response.End();
+}

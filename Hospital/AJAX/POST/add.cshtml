@@ -1,0 +1,115 @@
+﻿@using WebMatrix.Data;
+@using Newtonsoft.Json;
+@{
+    Layout = null;
+
+    // Initialize variables for hospital data
+    var hospitalIdToEdit = 0;
+    var hospitalNameToEdit = string.Empty;
+    var hospitalAddressToEdit = string.Empty;
+    var hospitalPhoneToEdit = string.Empty;
+    var hospitalEmailToEdit = string.Empty;
+
+    // Check if it's a POST request to insert/update hospital data
+    if (Request.HttpMethod == "POST")
+    {
+        // Read POST data
+        var data = new System.IO.StreamReader(Request.InputStream).ReadToEnd();
+        var hospitalData = JsonConvert.DeserializeObject<dynamic>(data);
+
+        // Extract data from the dynamic object with explicit null checks
+        var hospitalId = (hospitalData.id != null) ? (int)hospitalData.id : 0;
+        var hospitalName = (hospitalData.name != null) ? hospitalData.name.ToString() : string.Empty;
+        var hospitalAddress = (hospitalData.address != null) ? hospitalData.address.ToString() : string.Empty;
+        var hospitalPhone = (hospitalData.phone != null) ? hospitalData.phone.ToString() : string.Empty;
+        var hospitalEmail = (hospitalData.email != null) ? hospitalData.email.ToString() : string.Empty;
+
+        // Open database connection
+        var db = Database.Open("Hospitals");
+
+        // Insert or update logic
+        if (hospitalId > 0)
+        {
+            // Update existing hospital
+            db.Execute("UPDATE dbo.Hospitals SET Name = @0, Address = @1, Phone = @2, Email = @3 WHERE Id = @4",
+                hospitalName, hospitalAddress, hospitalPhone, hospitalEmail, hospitalId);
+        }
+        else
+        {
+            // Insert new hospital
+            db.Execute("INSERT INTO dbo.Hospitals (Name, Address, Phone, Email) VALUES (@0, @1, @2, @3)",
+                hospitalName, hospitalAddress, hospitalPhone, hospitalEmail);
+        }
+
+        // Respond with success
+        Response.StatusCode = 200;
+        Response.Write("Success");
+        Response.End();
+    }
+
+    // Check if we're editing an existing hospital
+    var hospitalIdFromQuery = Request["id"].AsInt();
+    if (hospitalIdFromQuery > 0)
+    {
+        var db = Database.Open("Hospitals");
+        var hospital = db.Query("SELECT * FROM dbo.Hospitals WHERE Id = @0", hospitalIdFromQuery).FirstOrDefault();
+
+        if (hospital != null)
+        {
+            hospitalIdToEdit = hospital.Id;
+            hospitalNameToEdit = hospital.Name;
+            hospitalAddressToEdit = hospital.Address;
+            hospitalPhoneToEdit = hospital.Phone;
+            hospitalEmailToEdit = hospital.Email;
+        }
+    }
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- jQuery -->
+    <title>@(hospitalIdToEdit > 0 ? "Edit Hospital" : "Add New Hospital")</title>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>@(hospitalIdToEdit > 0 ? "Edit Hospital" : "Add New Hospital")</h1>
+
+        <!-- Hospital Form -->
+        <form id="addHospitalForm" class="mt-4">
+            <input type="hidden" id="hospitalId" name="id" value="@hospitalIdToEdit" />
+
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" class="form-control" value="@hospitalNameToEdit" required />
+            </div>
+
+            <div class="form-group">
+                <label for="address">Address:</label>
+                <input type="text" id="address" name="address" class="form-control" value="@hospitalAddressToEdit" required />
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone:</label>
+                <input type="text" id="phone" name="phone" class="form-control" value="@hospitalPhoneToEdit" required />
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" class="form-control" value="@hospitalEmailToEdit" required />
+            </div>
+
+            <div class="form-group">
+                <button type="button" class="btn btn-success" onclick="addHospital()">Submit</button>
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='/Hospital/AJAX/GET/default.cshtml'">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="~/Hospital/AJAX/JS/controller.js"></script>
+    <!-- Bootstrap JS (No Popper) -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

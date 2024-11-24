@@ -1,0 +1,21 @@
+﻿@using WebMatrix.Data;
+@using Newtonsoft.Json;
+
+@{
+    Layout = null;
+
+    // Open the database connection
+    var db = Database.Open("Hospitals");
+
+    // Query all hospitals from the database
+    var hospitals = db.Query("SELECT * FROM Hospitals").ToList();
+
+    // Set response content type to JSON
+    Response.ContentType = "application/json";
+    Response.StatusCode = 200;
+
+    // Serialize the data to JSON and return it
+    var json = JsonConvert.SerializeObject(hospitals);
+    Response.Write(json);
+    Response.End();
+}

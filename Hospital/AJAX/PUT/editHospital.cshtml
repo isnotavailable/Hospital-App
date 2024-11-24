@@ -1,0 +1,46 @@
+﻿@using WebMatrix.Data;
+@using Newtonsoft.Json;
+
+@{
+    Layout = null;
+
+    // Check for PUT request
+    if (Request.HttpMethod == "PUT")
+    {
+        // Read and parse JSON data from request body
+        var data = new System.IO.StreamReader(Request.InputStream).ReadToEnd();
+        var hospitalData = JsonConvert.DeserializeObject<dynamic>(data);
+
+        int hospitalId = hospitalData.id ?? 0;
+        string hospitalName = hospitalData.name ?? string.Empty;
+        string hospitalAddress = hospitalData.address ?? string.Empty;
+        string hospitalPhone = hospitalData.phone ?? string.Empty;
+        string hospitalEmail = hospitalData.email ?? string.Empty;
+
+        var db = Database.Open("Hospitals");
+
+        if (hospitalId > 0)
+        {
+            // Update existing hospital
+            db.Execute("UPDATE Hospitals SET Name = @0, Address = @1, Phone = @2, Email = @3 WHERE Id = @4",
+                hospitalName, hospitalAddress, hospitalPhone, hospitalEmail, hospitalId);
+        }
+        else
+        {
+            // Insert new hospital if the ID is not provided (or invalid)
+            db.Execute("INSERT INTO Hospitals (Name, Address, Phone, Email) VALUES (@0, @1, @2, @3)",
+                hospitalName, hospitalAddress, hospitalPhone, hospitalEmail);
+        }
+
+        Response.StatusCode = 200;
+        Response.Write("Success");
+        Response.End();
+    }
+    else
+    {
+        // Handle non-PUT requests here (optional)
+        Response.StatusCode = 405;  // Method Not Allowed
+        Response.Write("Method not allowed");
+        Response.End();
+    }
+}

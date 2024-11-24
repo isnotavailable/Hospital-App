@@ -1,0 +1,83 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- jQuery -->
+    <script src="~/Hospital/AJAX/JS/controller.js"></script>
+    <title>Hospitals List</title>
+    <style>
+        /* Darker styling for the sidebar */
+        #sidebar {
+            height: 100vh;
+            background-color: #343a40; /* Dark gray background */
+            padding-top: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 200px;
+            color: white; /* Text color */
+        }
+
+            #sidebar h4, #sidebar .nav-link {
+                color: #ffffff; /* White text color for readability */
+            }
+
+                #sidebar .nav-link:hover {
+                    color: #adb5bd; /* Light gray color for hover effect */
+                }
+
+        #mainContent {
+            margin-left: 220px; /* Adjusted for sidebar width */
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <div id="sidebar" class="d-flex flex-column align-items-start p-3">
+        <h4>Hospitals& more</h4>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a href="/Hospital/AJAX/GET/default.cshtml" class="nav-link">Main Page</a>
+            </li>
+            <li class="nav-item">
+                <a href="/Hospital/AJAX/POST/add.cshtml" class="nav-link">Add New Hospital</a>
+            </li>
+            <!-- Add other links here if needed -->
+        </ul>
+    </div>
+
+    <!-- Main Content Area -->
+    <div id="mainContent" class="container mt-4">
+        <h1>Hospitals</h1>
+
+        <!-- Loader -->
+        <div id="loader" style="display:none;" class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+
+        <!-- Button to show hospitals -->
+        <button id="showDataButton" class="btn btn-primary mb-3">Show Hospitals</button>
+
+        <!-- Hospitals List -->
+        <div id="hospitalList"></div>
+
+        <!-- Button to add a new hospital -->
+        <button onclick="window.location.href='/Hospital/AJAX/POST/add.cshtml'" class="btn btn-info mt-4">Add New Hospital</button>
+    </div>
+
+    <!-- JavaScript for Fetching Data -->
+    <script>
+        $(document).ready(function () {
+            $('#showDataButton').click(function () {
+                fetchHospitals();
+            });
+        });
+    </script>
+
+    <!-- Bootstrap JS (No Popper) -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
